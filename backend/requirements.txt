@@ -1,0 +1,22 @@
+fastapi
+uvicorn
+python-dotenv
+python-multipart
+pydantic
+pydantic-settings
+
+# Resume processing
+pypdf
+python-docx
+
+# AI
+transformers
+sentence-transformers
+torch
+
+# HTTP requests
+requests
+httpx
+
+# Database
+sqlalchemy

@@ -1,0 +1,95 @@
+# =========================
+# Frontend (React + Vite)
+# =========================
+
+frontend/node_modules/
+frontend/dist/
+
+# Vite cache
+frontend/.vite/
+
+
+# =========================
+# Backend (Python/FastAPI)
+# =========================
+
+backend/venv/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Python build files
+*.egg-info/
+dist/
+build/
+
+
+# =========================
+# Environment Variables
+# =========================
+
+.env
+*.env
+venv
+
+backend/.env
+frontend/.env
+
+
+# =========================
+# Databases
+# =========================
+
+*.db
+*.sqlite
+*.sqlite3
+
+
+# =========================
+# AI / ML Files
+# =========================
+
+# Model weights
+*.bin
+*.pt
+*.pth
+*.safetensors
+
+# HuggingFace cache
+.cache/
+huggingface/
+
+# Local embeddings/vector DB
+qdrant_storage/
+chroma_db/
+
+
+# =========================
+# Logs
+# =========================
+
+*.log
+logs/
+
+
+# =========================
+# IDE Files
+# =========================
+
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+
+# =========================
+# Temporary Files
+# =========================
+
+*.tmp
+*.temp
+*.swp
