@@ -109,3 +109,54 @@ def extract_profile_from_text(
         )
 
     return profile_json
+
+import json
+
+
+async def extract_job_requirements(job_description: str) -> dict:
+    """
+    Use the LLM to extract structured requirements from a raw job description.
+    Assumes this file already has a configured Gemini/LLM client available
+    as `model` or similar — adjust the call below to match your existing
+    client setup.
+    """
+    prompt = f"""Extract structured requirements from this job description.
+
+Return ONLY valid JSON, no markdown formatting, no preamble, in exactly this shape:
+{{
+  "required_skills": ["skill1", "skill2"],
+  "preferred_skills": ["skill1", "skill2"],
+  "experience_years": <number or null>,
+  "education": ["degree1", "degree2"]
+}}
+
+Job description:
+{job_description}
+"""
+
+    response = await client.aio.models.generate_content(
+    model="gemini-2.5-flash",
+    contents=prompt,
+    config={
+        "temperature": 0,
+        "response_mime_type": "application/json"
+    }
+)  # replace with your existing LLM call
+    raw_text = response.text.strip()
+
+    # Strip markdown code fences if the model adds them
+    if raw_text.startswith("```"):
+        raw_text = raw_text.strip("`")
+        if raw_text.startswith("json"):
+            raw_text = raw_text[4:]
+        raw_text = raw_text.strip()
+
+    try:
+        return json.loads(raw_text)
+    except json.JSONDecodeError:
+        return {
+            "required_skills": [],
+            "preferred_skills": [],
+            "experience_years": None,
+            "education": [],
+        }

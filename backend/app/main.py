@@ -6,7 +6,7 @@ from app.routes import auth
 from app.routes import resume
 from app.routes import jobs
 from app.routes import career
-
+from app.routes import match
 
 
 app = FastAPI(
@@ -23,7 +23,7 @@ app.add_middleware(
     CORSMiddleware,
 
     allow_origins=[
-        "http://localhost:5173"
+        "*"
     ],
 
     allow_credentials=True,
@@ -41,6 +41,9 @@ app.include_router(
     tags=["Authentication"]
 )
 
+app.include_router(
+    match.router
+)
 
 app.include_router(
     resume.router,
@@ -51,7 +54,7 @@ app.include_router(
 
 app.include_router(
     jobs.router,
-    prefix="/jobs",
+    
     tags=["Jobs"]
 )
 
