@@ -10,7 +10,8 @@ import Networking from "./pages/Networking";
 
 import Sidebar from "./components/Sidebar";
 import Navbar from "./components/Navbar";
-
+import Login from "./pages/Login";
+import Signup from "./pages/Signup";
 
 function App(){
 
@@ -26,7 +27,9 @@ function App(){
           <Routes>
 
             <Route path="/" element={<Dashboard />} />
+            <Route path="/login" element={<Login/>}/>
 
+<Route path="/signup" element={<Signup/>}/>
             <Route 
               path="/resume"
               element={<ResumeUpload />}

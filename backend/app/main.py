@@ -44,7 +44,7 @@ app.include_router(
 
 app.include_router(
     resume.router,
-    prefix="/resume",
+
     tags=["Resume"]
 )
 

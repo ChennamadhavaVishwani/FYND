@@ -1,37 +1,44 @@
 import { Bell, UserCircle } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 
 function Navbar(){
 
-return(
-
-<div className="navbar">
+    const navigate = useNavigate();
 
 
-<div>
+    return(
+ 
+        <div className="navbar">
 
-<h2>
-Career Intelligence System
-</h2>
-
-</div>
-
-
-<div className="nav-icons">
-
-
-<Bell size={22}/>
-
-<UserCircle size={28}/>
+            <div>
+                <h2>
+                    Career Intelligence System
+                </h2>
+            </div>
 
 
-</div>
+            <div className="nav-icons">
+
+                <button onClick={() => navigate("/login")}>
+                    Login
+                </button>
 
 
-</div>
+                <button onClick={() => navigate("/signup")}>
+                    Signup
+                </button>
 
-)
 
+                <Bell size={22}/>
+
+                <UserCircle size={28}/>
+
+            </div>
+
+        </div>
+
+    )
 }
 
 
