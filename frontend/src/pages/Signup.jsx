@@ -1,53 +1,131 @@
 import { useState } from "react";
 import { supabase } from "../lib/supabase";
+import { useNavigate, Link } from "react-router-dom";
+import { KeyRound, Mail, AlertTriangle, ArrowRight, CheckCircle2 } from "lucide-react";
 
+export default function Signup() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-export default function Signup(){
+  const navigate = useNavigate();
 
-    const [email,setEmail] = useState("");
-    const [password,setPassword] = useState("");
-
-
-    async function signup(){
-
-        const {data,error} =
-            await supabase.auth.signUp({
-                email,
-                password
-            });
-
-
-        if(error){
-            console.log(error.message);
-            return;
-        }
-
-
-        console.log(
-            "User created:",
-            data.user
-        );
+  async function handleSignup(e) {
+    e.preventDefault();
+    if (!email || !password) {
+      setError("Please fill in all fields.");
+      return;
     }
 
+    if (password.length < 6) {
+      setError("Password must be at least 6 characters.");
+      return;
+    }
 
-    return (
-        <div>
+    setLoading(true);
+    setError("");
+    setSuccess(false);
 
-            <input
-                placeholder="Email"
-                onChange={(e)=>setEmail(e.target.value)}
-            />
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+      });
 
-            <input
-                placeholder="Password"
-                type="password"
-                onChange={(e)=>setPassword(e.target.value)}
-            />
+      if (error) {
+        setError(error.message);
+        return;
+      }
 
-            <button onClick={signup}>
-                Signup
-            </button>
+      console.log("User created:", data.user);
+      setSuccess(true);
+      setEmail("");
+      setPassword("");
+    } catch (err) {
+      setError(err.message || "An unexpected error occurred.");
+    } finally {
+      setLoading(false);
+    }
+  }
 
+  return (
+    <div style={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "80vh", padding: "20px" }}>
+      <div className="card primary-glow" style={{ width: "100%", maxWidth: "440px", padding: "40px" }}>
+        <div style={{ textAlign: "center", marginBottom: "30px" }}>
+          <h1 style={{ fontSize: "2rem", marginBottom: "8px", background: "var(--grad-primary)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
+            Create Account
+          </h1>
+          <p style={{ color: "var(--text-secondary)", fontSize: "0.95rem" }}>
+            Get started on your AI-powered career search
+          </p>
         </div>
-    )
+
+        {error && (
+          <div style={{ display: "flex", alignItems: "center", gap: "8px", background: "rgba(239, 68, 68, 0.1)", border: "1px solid rgba(239, 68, 68, 0.2)", color: "#ef4444", padding: "12px", borderRadius: "8px", marginBottom: "20px", fontSize: "0.9rem" }}>
+            <AlertTriangle size={18} style={{ flexShrink: 0 }} />
+            <span>{error}</span>
+          </div>
+        )}
+
+        {success && (
+          <div style={{ display: "flex", alignItems: "center", gap: "8px", background: "rgba(16, 185, 129, 0.1)", border: "1px solid rgba(16, 185, 129, 0.2)", color: "#10b981", padding: "12px", borderRadius: "8px", marginBottom: "20px", fontSize: "0.9rem" }}>
+            <CheckCircle2 size={18} style={{ flexShrink: 0 }} />
+            <span>Check your email to confirm verification link.</span>
+          </div>
+        )}
+
+        <form onSubmit={handleSignup} style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+          <div>
+            <label style={{ fontSize: "0.85rem", color: "var(--text-secondary)", display: "block", marginBottom: "6px" }}>
+              Email Address
+            </label>
+            <div style={{ position: "relative" }}>
+              <Mail size={18} style={{ position: "absolute", left: "14px", top: "14px", color: "var(--text-muted)" }} />
+              <input
+                type="email"
+                placeholder="you@example.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                style={{ paddingLeft: "44px", marginBottom: "0" }}
+                disabled={loading}
+              />
+            </div>
+          </div>
+
+          <div>
+            <label style={{ fontSize: "0.85rem", color: "var(--text-secondary)", display: "block", marginBottom: "6px" }}>
+              Password
+            </label>
+            <div style={{ position: "relative" }}>
+              <KeyRound size={18} style={{ position: "absolute", left: "14px", top: "14px", color: "var(--text-muted)" }} />
+              <input
+                type="password"
+                placeholder="At least 6 characters"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                style={{ paddingLeft: "44px", marginBottom: "0" }}
+                disabled={loading}
+              />
+            </div>
+          </div>
+
+          <button type="submit" className="primary" disabled={loading} style={{ width: "100%", marginTop: "10px" }}>
+            <span>{loading ? "Creating..." : "Sign Up"}</span>
+            <ArrowRight size={16} className="arrow-icon" />
+          </button>
+        </form>
+
+        <div style={{ textAlign: "center", marginTop: "24px" }}>
+          <p style={{ color: "var(--text-secondary)", fontSize: "0.9rem" }}>
+            Already have an account?{" "}
+            <Link to="/login" style={{ color: "#a78bfa", textDecoration: "none", fontWeight: "600" }}>
+              Log In
+            </Link>
+          </p>
+        </div>
+      </div>
+    </div>
+  );
 }

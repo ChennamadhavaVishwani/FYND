@@ -1,6 +1,7 @@
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, HTTPException, Query, Depends
 
 from app.services.match_service import match_resume_to_all_jobs, match_resume_to_job
+from app.auth.dependencies import get_current_user
 
 
 router = APIRouter(
@@ -11,18 +12,14 @@ router = APIRouter(
 
 @router.get("/jobs")
 async def match_all_jobs(
-    user_id: str,
-    limit: int = 20
+    current_user: str = Depends(get_current_user),
+    limit: int = Query(default=20, ge=1, le=100)
 ):
 
-    print("USER ID:", user_id)
-
     matches = await match_resume_to_all_jobs(
-        user_id=user_id,
+        user_id=current_user,
         limit=limit
     )
-
-    print("MATCHES:", matches)
 
     return {
         "limit": limit,
@@ -32,12 +29,12 @@ async def match_all_jobs(
 @router.get("/job/{job_id}")
 async def match_job(
     job_id: str,
-    user_id: str
+    current_user: str = Depends(get_current_user)
 ):
 
     try:
         result = await match_resume_to_job(
-            user_id=user_id,
+            user_id=current_user,
             job_id=job_id
         )
 

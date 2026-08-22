@@ -1,57 +1,52 @@
-import {Link} from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
+import { 
+  LayoutDashboard, 
+  FileText, 
+  User, 
+  Briefcase, 
+  Compass, 
+  BookOpen, 
+  Users,
+  Sparkles,
+  ClipboardList
+} from "lucide-react";
 
+function Sidebar() {
+  const location = useLocation();
 
-function Sidebar(){
+  const menuItems = [
+    { path: "/", label: "Dashboard", icon: LayoutDashboard },
+    { path: "/resume", label: "Resume Upload", icon: FileText },
+    { path: "/profile", label: "Personal Dashboard", icon: User },
+    { path: "/jobs", label: "Job Recommendations", icon: Briefcase },
+    { path: "/skills", label: "Skill Gap Analysis", icon: Compass },
+    { path: "/interview", label: "Interview Prep", icon: BookOpen },
+    { path: "/networking", label: "Networking Suggestions", icon: Users },
+    { path: "/copilot", label: "AI Career Copilot", icon: Sparkles },
+    { path: "/tracker", label: "Application Tracker", icon: ClipboardList },
+  ];
 
-return(
-
-<div className="sidebar">
-
-<h2>
-FYND
-</h2>
-
-
-<Link to="/">
-Dashboard
-</Link>
-
-
-<Link to="/resume">
-Resume Upload
-</Link>
-
-
-<Link to="/profile">
-Career Profile
-</Link>
-
-
-<Link to="/jobs">
-Job Recommendations
-</Link>
-
-
-<Link to="/skills">
-Skill Gap Analysis
-</Link>
-
-
-<Link to="/interview">
-Interview Prep
-</Link>
-
-
-<Link to="/networking">
-Networking
-</Link>
-
-
-</div>
-
-)
-
+  return (
+    <div className="sidebar">
+      <h2>FYND</h2>
+      <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+        {menuItems.map((item) => {
+          const Icon = item.icon;
+          const isActive = location.pathname === item.path;
+          return (
+            <Link 
+              key={item.path} 
+              to={item.path}
+              className={isActive ? "active" : ""}
+            >
+              <Icon size={18} className="icon-shadow" />
+              <span>{item.label}</span>
+            </Link>
+          );
+        })}
+      </div>
+    </div>
+  );
 }
-
 
 export default Sidebar;

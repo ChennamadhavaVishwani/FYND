@@ -28,6 +28,56 @@ router = APIRouter(
 BUCKET_NAME = "resumes"
 
 
+@router.get("/latest")
+def get_latest_resume(user_id: str = Depends(get_current_user)):
+    """
+    Return the most recent resume record for the authenticated user.
+    Used by the frontend to show an "already on file" banner.
+    """
+    resume_res = (
+        supabase.table("resumes")
+        .select("id, file_name, file_url, created_at")
+        .eq("user_id", user_id)
+        .order("created_at", desc=True)
+        .limit(1)
+        .execute()
+    )
+    if not resume_res.data:
+        return None
+
+    resume = resume_res.data[0]
+    resume_id = resume["id"]
+
+    # Find attached profile
+    profile_res = (
+        supabase.table("profiles")
+        .select("id")
+        .eq("resume_id", resume_id)
+        .limit(1)
+        .execute()
+    )
+    profile_id = profile_res.data[0]["id"] if profile_res.data else None
+
+    skill_count = 0
+    if profile_id:
+        skills_res = (
+            supabase.table("skills")
+            .select("id", count="exact")
+            .eq("profile_id", profile_id)
+            .execute()
+        )
+        skill_count = skills_res.count or 0
+
+    return {
+        "resume_id": resume_id,
+        "profile_id": profile_id,
+        "file_name": resume["file_name"],
+        "file_url": resume["file_url"],
+        "uploaded_at": resume["created_at"],
+        "skill_count": skill_count,
+    }
+
+
 @router.post("/upload", response_model=ResumeUploadResponse)
 async def upload_resume(
     file: UploadFile = File(...),
@@ -78,7 +128,7 @@ async def upload_resume(
 
     # Extract structured profile using Gemini
     try:
-        profile_json = extract_profile_from_text(raw_text)
+        profile_json = extract_profile_from_text(raw_text, pdf_bytes=file_bytes)
 
     except ValueError as e:
         raise HTTPException(

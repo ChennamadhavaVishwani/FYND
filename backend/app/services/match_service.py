@@ -22,6 +22,36 @@ def extract_skill_names(skills: list[dict]) -> list[str]:
     return [s["skill_name"] for s in skills if s.get("skill_name")]
 
 
+def extract_all_candidate_skills(profile: dict) -> list[str]:
+    """
+    Extract candidate skills from ALL profile sources:
+    - Explicit skills table entries
+    - tech_stack arrays inside each project
+
+    This ensures a candidate who built a RAG pipeline in a project
+    but didn't explicitly list it as a skill is still credited for it
+    during matching and gap analysis.
+    """
+    skills = [s["skill_name"] for s in profile.get("skills", []) if s.get("skill_name")]
+
+    for proj in profile.get("projects", []):
+        tech_stack = proj.get("tech_stack")
+        if isinstance(tech_stack, list):
+            skills.extend([str(t).strip() for t in tech_stack if t])
+        elif isinstance(tech_stack, str):
+            skills.extend([t.strip() for t in tech_stack.split(",") if t.strip()])
+
+    # Deduplicate case-insensitively, preserving first occurrence.
+    seen: set[str] = set()
+    unique: list[str] = []
+    for s in skills:
+        cleaned = s.strip()
+        if cleaned and cleaned.lower() not in seen:
+            seen.add(cleaned.lower())
+            unique.append(cleaned)
+    return unique
+
+
 def extract_experience_years(profile: dict) -> Optional[float]:
     """
     Pulls total years of experience from profile_json if your extraction
@@ -47,15 +77,60 @@ def extract_education(profile: dict) -> list[str]:
     return [education] if education else []
 
 
-def compute_skill_overlap(resume_skills: list[str], job_skills: list[str]) -> float:
-    if not job_skills:
+async def compute_semantic_skill_overlap(
+    resume_skills: list[str],
+    job_skills: list[str],
+    cache: dict | None = None,
+) -> float:
+    """
+    Compute skill overlap using exact matching first, then embedding similarity.
+
+    Replaces the old raw set-intersection that failed for synonyms like
+    "NLP" vs "Natural Language Processing" or "RAG" vs "RAG engineering".
+
+    The optional cache parameter allows a shared embedding cache to be passed in
+    to avoid redundant API calls when scoring multiple jobs in one request.
+    """
+    if not job_skills or not resume_skills:
         return 0.0
-    resume_set = {s.strip().lower() for s in resume_skills}
-    job_set = {s.strip().lower() for s in job_skills}
-    if not job_set:
-        return 0.0
-    overlap = resume_set & job_set
-    return len(overlap) / len(job_set)
+
+    if cache is None:
+        cache = {}
+
+    matched_count = 0
+
+    for job_skill in job_skills:
+        js_clean = job_skill.strip().lower()
+
+        # Stage 1: exact case-insensitive match (fast path).
+        if any(js_clean == rs.strip().lower() for rs in resume_skills):
+            matched_count += 1
+            continue
+
+        # Stage 2: embedding cosine similarity.
+        if js_clean not in cache:
+            result = await asyncio.to_thread(create_embedding, job_skill)
+            cache[js_clean] = result.get("embedding", [])
+
+        job_vec = cache[js_clean]
+        if not job_vec:
+            continue
+
+        best_sim = 0.0
+        for rs in resume_skills:
+            rs_clean = rs.strip().lower()
+            if rs_clean not in cache:
+                result = await asyncio.to_thread(create_embedding, rs)
+                cache[rs_clean] = result.get("embedding", [])
+
+            rs_vec = cache[rs_clean]
+            if rs_vec:
+                best_sim = max(best_sim, cosine_similarity(job_vec, rs_vec))
+
+        if best_sim >= 0.80:
+            matched_count += 1
+
+    return matched_count / len(job_skills)
 
 
 async def compute_semantic_similarity(resume_summary: str, job_description: str) -> float:
@@ -83,7 +158,7 @@ def compute_experience_match(resume_years: Optional[float], required_years: Opti
 async def generate_match_explanation(profile: dict, job: dict, score: float) -> dict:
     import json
 
-    resume_skills = extract_skill_names(profile.get("skills", []))
+    resume_skills = extract_all_candidate_skills(profile)
     resume_years = extract_experience_years(profile)
     resume_education = extract_education(profile)
 
@@ -136,11 +211,16 @@ Computed match score: {round(score * 100, 1)}%
         }
 
 
-async def _score_job(profile: dict, job: dict) -> dict:
-    resume_skills = extract_skill_names(profile.get("skills", []))
+async def _score_job(profile: dict, job: dict, embedding_cache: dict | None = None) -> dict:
+    resume_skills = extract_all_candidate_skills(profile)
     resume_years = extract_experience_years(profile)
 
-    skill_score = compute_skill_overlap(resume_skills, job.get("required_skills", []))
+    if embedding_cache is None:
+        embedding_cache = {}
+
+    skill_score = await compute_semantic_skill_overlap(
+        resume_skills, job.get("required_skills", []), embedding_cache
+    )
     semantic_score = await compute_semantic_similarity(
         profile.get("summary", "") or "", job.get("description", "") or ""
     )
@@ -193,12 +273,20 @@ async def match_resume_to_all_jobs(user_id: str, limit: int = 20) -> list[dict]:
     jobs = search_jobs(query=None, limit=limit)
     results = []
 
+    # Shared embedding cache across all jobs — each unique skill string
+    # is embedded only once regardless of how many jobs reference it.
+    embedding_cache: dict = {}
+
     for job in jobs:
-        scores = await _score_job(profile, job)
+        scores = await _score_job(profile, job, embedding_cache)
         results.append({
             "job_id": job["id"],
             "job_title": job.get("title"),
             "company": job.get("company"),
+            "location": job.get("location"),
+            "apply_url": job.get("apply_url") or job.get("url"),
+            "required_skills": job.get("required_skills", []),
+            "preferred_skills": job.get("preferred_skills", []),
             "match_score": round(scores["final_score"] * 100, 1),
         })
 
