@@ -113,8 +113,15 @@ app.include_router(
 
 @app.get("/")
 def home():
-
     return {
-        "app":"FYND",
-        "message":"Find Your Next Destination API running"
+        "app": "FYND",
+        "message": "Find Your Next Destination API running"
     }
+
+
+@app.get("/health")
+def health():
+    return {
+        "status": "healthy",
+        "app": "FYND"
+    }
