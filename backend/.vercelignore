@@ -1,0 +1,14 @@
+# Ignore virtual environment and cache for Vercel builds
+venv/
+.venv/
+env/
+ENV/
+__pycache__/
+*.py[cod]
+*.so
+.pytest_cache/
+tests/
+scripts/
+.git/
+.env
+.env.*
