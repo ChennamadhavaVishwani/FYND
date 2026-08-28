@@ -4,7 +4,7 @@ import {
   Search, Briefcase, Compass, BookOpen, Users,
   Sparkles, Kanban, ArrowUpRight, ChevronRight,
   FileText, Target, TrendingUp, CheckCircle2,
-  Zap, ShieldAlert, Loader2
+  Zap, ShieldAlert, Loader2, ShieldCheck
 } from "lucide-react";
 
 import { searchJobs, ingestJobs } from "../api/jobs";
@@ -17,43 +17,51 @@ import JobCard from "../components/JobCard";
 
 const QUICK_ACTIONS = [
   {
+    path: "/ats-scanner",
+    label: "ATS Scanner & Score",
+    description: "Scan your resume for ATS score, JD fit & fixes",
+    icon: ShieldCheck,
+    gradient: "linear-gradient(135deg, #3b82f6, #0ea5e9)",
+    glow: "rgba(59, 130, 246, 0.15)",
+  },
+  {
     path: "/jobs",
-    label: "AI Job Matches",
+    label: "Job Recommendations",
     description: "See every job ranked by your fit score",
     icon: Target,
-    gradient: "var(--grad-primary)",
-    glow: "rgba(139, 92, 246, 0.15)",
+    gradient: "linear-gradient(135deg, #2563eb, #3b82f6)",
+    glow: "rgba(37, 99, 235, 0.15)",
   },
   {
     path: "/skills",
     label: "Skill Gap Analysis",
     description: "Identify what's missing across market demands",
     icon: Compass,
-    gradient: "var(--grad-secondary)",
-    glow: "rgba(6, 182, 212, 0.15)",
+    gradient: "linear-gradient(135deg, #0ea5e9, #0284c7)",
+    glow: "rgba(14, 165, 233, 0.15)",
   },
   {
     path: "/interview",
     label: "Interview Prep",
-    description: "Practice with AI feedback on your answers",
+    description: "Practice with structured feedback on your answers",
     icon: BookOpen,
-    gradient: "linear-gradient(135deg, #f59e0b, #ef4444)",
+    gradient: "linear-gradient(135deg, #f59e0b, #d97706)",
     glow: "rgba(245, 158, 11, 0.15)",
   },
   {
     path: "/copilot",
-    label: "AI Career Copilot",
-    description: "Chat with your personal AI career advisor",
+    label: "Career Copilot",
+    description: "Consult with your intelligent career advisor",
     icon: Sparkles,
-    gradient: "linear-gradient(135deg, #ec4899, #8b5cf6)",
-    glow: "rgba(236, 72, 153, 0.15)",
+    gradient: "linear-gradient(135deg, #4f46e5, #3b82f6)",
+    glow: "rgba(79, 70, 229, 0.15)",
   },
   {
     path: "/tracker",
     label: "Application Tracker",
     description: "Manage your Kanban pipeline of applications",
     icon: Kanban,
-    gradient: "linear-gradient(135deg, #10b981, #3b82f6)",
+    gradient: "linear-gradient(135deg, #10b981, #059669)",
     glow: "rgba(16, 185, 129, 0.15)",
   },
   {
@@ -61,8 +69,8 @@ const QUICK_ACTIONS = [
     label: "Networking",
     description: "Find people and communities to connect with",
     icon: Users,
-    gradient: "linear-gradient(135deg, #06b6d4, #8b5cf6)",
-    glow: "rgba(6, 182, 212, 0.15)",
+    gradient: "linear-gradient(135deg, #0284c7, #4f46e5)",
+    glow: "rgba(2, 132, 199, 0.15)",
   },
 ];
 
@@ -193,18 +201,17 @@ export default function Dashboard() {
       <div style={{ marginBottom: "32px" }}>
         <h1
           style={{
-            fontSize: "2.6rem",
-            background: "var(--grad-primary)",
-            WebkitBackgroundClip: "text",
-            WebkitTextFillColor: "transparent",
-            lineHeight: 1.1,
+            fontSize: "2.5rem",
+            color: "#ffffff",
+            fontWeight: 800,
+            lineHeight: 1.15,
             marginBottom: "8px",
           }}
         >
           {firstName ? `Welcome back, ${firstName} 👋` : "Your Career Command Centre"}
         </h1>
-        <p style={{ color: "var(--text-secondary)", fontSize: "1rem" }}>
-          Everything you need to find, evaluate, and land your next role — powered by AI.
+        <p style={{ color: "var(--text-secondary)", fontSize: "0.95rem" }}>
+          Everything you need to find, evaluate, and land your next role.
         </p>
       </div>
 

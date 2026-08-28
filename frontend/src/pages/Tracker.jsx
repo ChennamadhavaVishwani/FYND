@@ -82,8 +82,8 @@ export default function Tracker() {
     <div style={{ maxWidth: "1250px", margin: "0 auto" }}>
       {/* Header */}
       <div style={{ marginBottom: "30px" }}>
-        <h1 style={{ fontSize: "2.5rem", background: "var(--grad-primary)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", display: "flex", alignItems: "center", gap: "10px" }}>
-          <Briefcase size={32} style={{ color: "#3b82f6" }} />
+        <h1 style={{ fontSize: "2.3rem", color: "#ffffff", fontWeight: 800, display: "flex", alignItems: "center", gap: "10px" }}>
+          <Briefcase size={30} style={{ color: "#3b82f6" }} />
           <span>Application Tracker</span>
         </h1>
         <p style={{ color: "var(--text-secondary)" }}>

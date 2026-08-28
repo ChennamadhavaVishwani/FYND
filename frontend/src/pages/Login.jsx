@@ -45,7 +45,7 @@ export default function Login() {
     <div style={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "80vh", padding: "20px" }}>
       <div className="card primary-glow" style={{ width: "100%", maxWidth: "440px", padding: "40px" }}>
         <div style={{ textAlign: "center", marginBottom: "30px" }}>
-          <h1 style={{ fontSize: "2rem", marginBottom: "8px", background: "var(--grad-primary)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
+          <h1 style={{ fontSize: "2rem", marginBottom: "8px", color: "#ffffff", fontWeight: 800 }}>
             Welcome Back
           </h1>
           <p style={{ color: "var(--text-secondary)", fontSize: "0.95rem" }}>

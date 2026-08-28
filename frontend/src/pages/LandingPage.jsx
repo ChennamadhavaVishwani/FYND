@@ -8,7 +8,7 @@ export default function LandingPage() {
     <div style={{ minHeight: "100vh", background: "radial-gradient(circle at 50% 30%, #151030 0%, var(--bg-dark) 70%)", color: "white", fontFamily: "'Inter', sans-serif" }}>
       {/* Header banner */}
       <header style={{ maxWidth: "1200px", margin: "0 auto", padding: "30px 20px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <h2 style={{ fontSize: "1.75rem", background: "var(--grad-primary)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", letterSpacing: "0.1em" }}>
+        <h2 style={{ fontSize: "1.75rem", color: "#ffffff", letterSpacing: "0.08em", fontWeight: 800 }}>
           FYND
         </h2>
         <div style={{ display: "flex", gap: "16px" }}>
@@ -23,14 +23,14 @@ export default function LandingPage() {
 
       {/* Hero Section */}
       <section style={{ maxWidth: "900px", margin: "0 auto", padding: "80px 20px 60px", textAlign: "center" }}>
-        <div style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "rgba(139, 92, 246, 0.1)", border: "1px solid rgba(139, 92, 246, 0.2)", padding: "6px 16px", borderRadius: "9999px", marginBottom: "24px" }}>
-          <Sparkles size={16} style={{ color: "#a78bfa" }} />
-          <span style={{ fontSize: "0.85rem", color: "#a78bfa", fontWeight: "600", fontFamily: "'Space Grotesk', sans-serif" }}>
-            Next-Gen AI Career Discovery Platform
+        <div style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "rgba(59, 130, 246, 0.1)", border: "1px solid rgba(59, 130, 246, 0.25)", padding: "6px 16px", borderRadius: "9999px", marginBottom: "24px" }}>
+          <Sparkles size={16} style={{ color: "#60a5fa" }} />
+          <span style={{ fontSize: "0.85rem", color: "#93c5fd", fontWeight: "600", fontFamily: "'Space Grotesk', sans-serif" }}>
+            Career Discovery &amp; Navigation Platform
           </span>
         </div>
 
-        <h1 style={{ fontSize: "3.5rem", lineHeight: "1.15", background: "linear-gradient(135deg, #ffffff 30%, #a78bfa 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", marginBottom: "20px", textShadow: "0px 4px 20px rgba(139, 92, 246, 0.15)" }}>
+        <h1 style={{ fontSize: "3.5rem", lineHeight: "1.15", color: "#ffffff", marginBottom: "20px", fontWeight: 800 }}>
           Find Your Next Destination
         </h1>
 

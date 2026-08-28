@@ -66,12 +66,12 @@ export default function Copilot() {
     <div style={{ maxWidth: "900px", margin: "0 auto", display: "flex", flexDirection: "column", height: "calc(100vh - 120px)" }}>
       {/* Header */}
       <div style={{ marginBottom: "20px", flexShrink: 0 }}>
-        <h1 style={{ fontSize: "2.3rem", background: "var(--grad-primary)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", display: "flex", alignItems: "center", gap: "10px" }}>
-          <Sparkles size={28} style={{ color: "#8b5cf6" }} />
-          <span>AI Career Copilot</span>
+        <h1 style={{ fontSize: "2.3rem", color: "#ffffff", fontWeight: 800, display: "flex", alignItems: "center", gap: "10px" }}>
+          <Sparkles size={28} style={{ color: "#3b82f6" }} />
+          <span>Career Copilot</span>
         </h1>
         <p style={{ color: "var(--text-secondary)", fontSize: "0.95rem" }}>
-          Consult your personalized AI advisor to identify target areas, map learning actions, and build interview confidence.
+          Consult your personalized career advisor to identify target areas, map learning actions, and build interview confidence.
         </p>
       </div>
 

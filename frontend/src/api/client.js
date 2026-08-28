@@ -1,8 +1,9 @@
 import { supabase } from "../lib/supabase";
 
-const BASE_URL = import.meta.env.VITE_API_BASE_URL;
+const rawBaseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
+export const BASE_URL = rawBaseUrl.replace(/\/+$/, "");
 
-async function getAuthHeaders() {
+export async function getAuthHeaders() {
   const { data: { session } } = await supabase.auth.getSession();
   return {
     "Content-Type": "application/json",
@@ -12,12 +13,16 @@ async function getAuthHeaders() {
   };
 }
 
-export async function apiGet(path, params = {}) {
+function buildUrl(path, params = {}) {
   const query = new URLSearchParams(
     Object.entries(params).filter(([, v]) => v !== undefined && v !== null)
   ).toString();
-  const url = `${BASE_URL}${path}${query ? `?${query}` : ""}`;
+  const cleanPath = path.startsWith("/") ? path : `/${path}`;
+  return `${BASE_URL}${cleanPath}${query ? `?${query}` : ""}`;
+}
 
+export async function apiGet(path, params = {}) {
+  const url = buildUrl(path, params);
   const headers = await getAuthHeaders();
   const res = await fetch(url, { headers });
 
@@ -29,11 +34,7 @@ export async function apiGet(path, params = {}) {
 }
 
 export async function apiPost(path, params = {}, body = undefined) {
-  const query = new URLSearchParams(
-    Object.entries(params).filter(([, v]) => v !== undefined && v !== null)
-  ).toString();
-  const url = `${BASE_URL}${path}${query ? `?${query}` : ""}`;
-
+  const url = buildUrl(path, params);
   const headers = await getAuthHeaders();
   const res = await fetch(url, {
     method: "POST",
@@ -49,11 +50,7 @@ export async function apiPost(path, params = {}, body = undefined) {
 }
 
 export async function apiPut(path, params = {}, body = undefined) {
-  const query = new URLSearchParams(
-    Object.entries(params).filter(([, v]) => v !== undefined && v !== null)
-  ).toString();
-  const url = `${BASE_URL}${path}${query ? `?${query}` : ""}`;
-
+  const url = buildUrl(path, params);
   const headers = await getAuthHeaders();
   const res = await fetch(url, {
     method: "PUT",
@@ -69,11 +66,7 @@ export async function apiPut(path, params = {}, body = undefined) {
 }
 
 export async function apiDelete(path, params = {}) {
-  const query = new URLSearchParams(
-    Object.entries(params).filter(([, v]) => v !== undefined && v !== null)
-  ).toString();
-  const url = `${BASE_URL}${path}${query ? `?${query}` : ""}`;
-
+  const url = buildUrl(path, params);
   const headers = await getAuthHeaders();
   const res = await fetch(url, {
     method: "DELETE",
@@ -85,4 +78,4 @@ export async function apiDelete(path, params = {}) {
     throw new Error(errBody.detail || `Request failed: ${res.status}`);
   }
   return res.json();
-}
+}

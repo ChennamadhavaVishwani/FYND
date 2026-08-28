@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Briefcase, ArrowUpRight, Sparkles, AlertCircle, Check, HelpCircle } from "lucide-react";
+import { Briefcase, ArrowUpRight, Sparkles, AlertCircle, Check, HelpCircle, Target } from "lucide-react";
 import { getProfile } from "../api/career";
 import { matchAllJobs, matchJob } from "../api/match";
 import { listApplications, createApplication } from "../api/applications";
@@ -81,9 +81,9 @@ export default function JobRecommendations() {
   return (
     <div style={{ maxWidth: "1000px", margin: "0 auto" }}>
       <div style={{ marginBottom: "30px" }}>
-        <h1 style={{ fontSize: "2.5rem", background: "var(--grad-primary)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", display: "flex", alignItems: "center", gap: "10px" }}>
-          <Sparkles size={32} style={{ color: "#ec4899" }} />
-          <span>AI Job Recommendations</span>
+        <h1 style={{ fontSize: "2.3rem", color: "#ffffff", fontWeight: 800, display: "flex", alignItems: "center", gap: "10px" }}>
+          <Target size={30} style={{ color: "#3b82f6" }} />
+          <span>Job Recommendations</span>
         </h1>
         <p style={{ color: "var(--text-secondary)" }}>
           Tailored roles matched dynamically against your verified skills, experience level, and project accomplishments.

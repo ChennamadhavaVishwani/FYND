@@ -27,6 +27,7 @@ import {
   addExperience, deleteExperience,
   listGoals, createGoal, toggleGoalSkill, deleteGoal
 } from "../api/career";
+import { getSkillGapOverview } from "../api/skillGap";
 
 export default function CareerProfile() {
   const [profile, setProfile] = useState(null);
@@ -40,6 +41,11 @@ export default function CareerProfile() {
   const [goalCreating, setGoalCreating] = useState(false);
   const [goalsOpen, setGoalsOpen] = useState(true);
   const [togglingSkill, setTogglingSkill] = useState(null); // "goalId:skill"
+
+  // AI Project Recommendations state
+  const [projectRecs, setProjectRecs] = useState(null); // null = loading, [] = empty
+  const [projectRecsError, setProjectRecsError] = useState(null);
+  const [expandedRec, setExpandedRec] = useState(null); // index of expanded card
 
   // Form states
   const [basicForm, setBasicForm] = useState({
@@ -61,7 +67,18 @@ export default function CareerProfile() {
   useEffect(() => {
     fetchProfileData();
     fetchGoals();
+    fetchProjectRecs();
   }, []);
+
+  async function fetchProjectRecs() {
+    try {
+      const data = await getSkillGapOverview();
+      setProjectRecs(data?.project_recommendations ?? []);
+    } catch (err) {
+      setProjectRecsError("Could not load AI project suggestions.");
+      setProjectRecs([]);
+    }
+  }
 
   async function fetchGoals() {
     try {
@@ -295,11 +312,11 @@ export default function CareerProfile() {
       {/* Page Header */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "30px", flexWrap: "wrap", gap: "16px" }}>
         <div>
-          <h1 style={{ fontSize: "2.5rem", background: "var(--grad-primary)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
+          <h1 style={{ fontSize: "2.3rem", color: "#ffffff", fontWeight: 800 }}>
             Personal Dashboard
           </h1>
           <p style={{ color: "var(--text-secondary)" }}>
-            View, update, and manage your professional career credentials like on Wellfound.
+            View, update, and manage your professional career credentials.
           </p>
         </div>
       </div>
@@ -598,7 +615,7 @@ export default function CareerProfile() {
         {/* Bio & Dashboard Stats */}
         <div style={{ display: "flex", flexDirection: "column", gap: "30px" }}>
           <div className="card secondary-glow" style={{ flex: "1" }}>
-            <h2 style={{ fontSize: "1.3rem", marginBottom: "12px", background: "var(--grad-secondary)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
+            <h2 style={{ fontSize: "1.25rem", marginBottom: "12px", color: "#ffffff", fontWeight: 700 }}>
               Professional Summary
             </h2>
             <p style={{ color: "var(--text-secondary)", fontSize: "1rem", lineHeight: "1.6" }}>
@@ -810,8 +827,8 @@ export default function CareerProfile() {
             <p style={{ color: "var(--text-muted)" }}>No education details added yet.</p>
           ) : (
             <div className="timeline">
-              {profile.profile_json.education.map(edu => (
-                <div key={edu.id} className="timeline-item">
+              {profile.profile_json.education.map((edu, idx) => (
+                <div key={edu.id ?? `${edu.school}-${edu.degree}-${idx}`} className="timeline-item">
                   <div className="timeline-header">
                     <div>
                       <h4 className="timeline-title">{edu.degree}</h4>
@@ -901,6 +918,153 @@ export default function CareerProfile() {
           </div>
         )}
       </div>
+
+      {/* ── AI Project Recommendations ── */}
+      <div className="card" id="ai-project-suggestions">
+        <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "20px" }}>
+          <div style={{
+            width: "40px", height: "40px", borderRadius: "10px",
+            background: "var(--grad-primary)",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            boxShadow: "var(--shadow-primary)", flexShrink: 0,
+          }}>
+            <Sparkles size={20} style={{ color: "white" }} />
+          </div>
+          <div>
+            <h2 style={{ fontSize: "1.4rem", fontWeight: 700, display: "flex", alignItems: "center", gap: "8px" }}>
+              AI Project Suggestions
+              <span style={{
+                background: "var(--grad-primary)", color: "white",
+                borderRadius: "9999px", padding: "2px 10px",
+                fontSize: "0.7rem", fontWeight: 700, letterSpacing: "0.05em",
+              }}>AI</span>
+            </h2>
+            <p style={{ color: "var(--text-secondary)", fontSize: "0.85rem", marginTop: "2px" }}>
+              Gemini-generated project ideas based on your skill gap — build these to close gaps and strengthen your portfolio.
+            </p>
+          </div>
+        </div>
+
+        {projectRecs === null && (
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: "16px" }}>
+            {[1, 2, 3].map(i => (
+              <div key={i} style={{
+                background: "rgba(255,255,255,0.02)", border: "1px solid var(--border-color)",
+                borderRadius: "10px", padding: "20px",
+                animation: "shimmer 1.5s ease-in-out infinite alternate",
+              }}>
+                <div style={{ height: "14px", background: "rgba(255,255,255,0.06)", borderRadius: "6px", marginBottom: "10px", width: "70%" }} />
+                <div style={{ height: "10px", background: "rgba(255,255,255,0.04)", borderRadius: "6px", marginBottom: "6px" }} />
+                <div style={{ height: "10px", background: "rgba(255,255,255,0.04)", borderRadius: "6px", width: "85%" }} />
+              </div>
+            ))}
+          </div>
+        )}
+
+        {projectRecsError && (
+          <p style={{ color: "var(--text-muted)", fontSize: "0.88rem" }}>{projectRecsError}</p>
+        )}
+
+        {projectRecs !== null && projectRecs.length === 0 && !projectRecsError && (
+          <p style={{ color: "var(--text-muted)", fontSize: "0.88rem" }}>
+            No suggestions yet — make sure your resume is uploaded and job listings are saved so Gemini can tailor project ideas to your gaps.
+          </p>
+        )}
+
+        {projectRecs?.length > 0 && (
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: "16px" }}>
+            {projectRecs.map((proj, idx) => {
+              const isExpanded = expandedRec === idx;
+              const diffColor = proj.difficulty === "Beginner" ? "#22c55e"
+                : proj.difficulty === "Advanced" ? "#ef4444" : "#f59e0b";
+              const diffBg = proj.difficulty === "Beginner" ? "rgba(34,197,94,0.1)"
+                : proj.difficulty === "Advanced" ? "rgba(239,68,68,0.1)" : "rgba(245,158,11,0.1)";
+              const diffBorder = proj.difficulty === "Beginner" ? "rgba(34,197,94,0.25)"
+                : proj.difficulty === "Advanced" ? "rgba(239,68,68,0.25)" : "rgba(245,158,11,0.25)";
+              return (
+                <div
+                  key={idx}
+                  style={{
+                    background: "var(--bg-card)", border: "1px solid var(--border-color)",
+                    borderLeft: `4px solid ${diffColor}`, borderRadius: "10px",
+                    padding: "20px", display: "flex", flexDirection: "column", gap: "12px",
+                    transition: "all 0.22s ease",
+                  }}
+                  onMouseEnter={e => { e.currentTarget.style.borderColor = diffColor; e.currentTarget.style.boxShadow = "0 6px 20px rgba(0,0,0,0.3)"; }}
+                  onMouseLeave={e => { e.currentTarget.style.borderColor = "var(--border-color)"; e.currentTarget.style.borderLeftColor = diffColor; e.currentTarget.style.boxShadow = "none"; }}
+                >
+                  <div>
+                    <h3 style={{ fontSize: "0.97rem", fontWeight: 700, lineHeight: "1.35", marginBottom: "8px", color: "white" }}>
+                      {proj.title}
+                    </h3>
+                    <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
+                      <span style={{ display: "inline-flex", alignItems: "center", gap: "4px", background: diffBg, color: diffColor, border: `1px solid ${diffBorder}`, borderRadius: "9999px", padding: "2px 9px", fontSize: "0.72rem", fontWeight: 700 }}>
+                        {proj.difficulty}
+                      </span>
+                      <span style={{ display: "inline-flex", alignItems: "center", gap: "4px", background: "rgba(6,182,212,0.08)", color: "#22d3ee", border: "1px solid rgba(6,182,212,0.2)", borderRadius: "9999px", padding: "2px 9px", fontSize: "0.72rem", fontWeight: 600 }}>
+                        ⏱ {proj.estimated_time}
+                      </span>
+                    </div>
+                  </div>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: "5px" }}>
+                    {(proj.skills_practiced || []).map((sk, i) => (
+                      <span key={i} style={{ background: "rgba(139,92,246,0.1)", color: "#a78bfa", border: "1px solid rgba(139,92,246,0.2)", borderRadius: "9999px", padding: "2px 9px", fontSize: "0.73rem", fontWeight: 500 }}>
+                        {sk}
+                      </span>
+                    ))}
+                  </div>
+                  <button
+                    id={`proj-rec-expand-${idx}`}
+                    onClick={() => setExpandedRec(isExpanded ? null : idx)}
+                    style={{ display: "flex", alignItems: "center", gap: "5px", background: "transparent", border: "none", color: "var(--text-muted)", cursor: "pointer", fontFamily: "'Space Grotesk', sans-serif", fontSize: "0.8rem", fontWeight: 600, padding: "0", transition: "color 0.2s" }}
+                    onMouseEnter={e => e.currentTarget.style.color = "white"}
+                    onMouseLeave={e => e.currentTarget.style.color = "var(--text-muted)"}
+                  >
+                    {isExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+                    {isExpanded ? "Hide details" : "View details"}
+                  </button>
+                  {isExpanded && (
+                    <div style={{ background: "#0f1016", borderRadius: "8px", padding: "14px", animation: "fadeIn 0.2s ease" }}>
+                      <p style={{ fontSize: "0.85rem", color: "var(--text-secondary)", lineHeight: "1.6", marginBottom: "12px" }}>
+                        {proj.description}
+                      </p>
+                      {proj.tech_stack?.length > 0 && (
+                        <div>
+                          <p style={{ fontSize: "0.73rem", color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "6px", fontWeight: 600 }}>Suggested Tech Stack</p>
+                          <div style={{ display: "flex", flexWrap: "wrap", gap: "5px" }}>
+                            {proj.tech_stack.map((tech, i) => (
+                              <span key={i} style={{ background: "rgba(255,255,255,0.05)", border: "1px solid var(--border-color)", color: "var(--text-primary)", borderRadius: "5px", padding: "3px 8px", fontSize: "0.75rem", fontFamily: "monospace" }}>
+                                {tech}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                      <button
+                        id={`proj-rec-add-${idx}`}
+                        onClick={() => {
+                          setProjectForm({ title: proj.title, description: proj.description || "", tech_stack: (proj.tech_stack || []).join(", ") });
+                          document.getElementById("my-projects-section")?.scrollIntoView({ behavior: "smooth", block: "start" });
+                        }}
+                        className="primary"
+                        style={{ marginTop: "12px", width: "100%", padding: "10px" }}
+                      >
+                        <Plus size={14} />
+                        <span>Use as template</span>
+                      </button>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+
+      <style>{`
+        @keyframes shimmer { from { opacity: 0.5; } to { opacity: 1; } }
+        @keyframes fadeIn  { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
+      `}</style>
     </div>
   );
 }

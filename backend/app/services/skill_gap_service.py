@@ -1465,7 +1465,92 @@ Return JSON only:
 
 
 # ============================================================================
-# 13. SINGLE JOB API
+# 13. PROJECT RECOMMENDATIONS
+# ============================================================================
+
+async def generate_project_recommendations(
+    missing_skills: list[dict],
+) -> list[dict]:
+    """
+    Use Gemini to generate portfolio-building project ideas that specifically
+    target the user's skill gaps.
+
+    Each project has:
+        title            – catchy project name
+        description      – 2-3 sentence description
+        skills_practiced – list of skill names from the gap list this covers
+        difficulty       – "Beginner" | "Intermediate" | "Advanced"
+        estimated_time   – e.g. "1-2 weeks"
+        tech_stack       – suggested tools / languages
+    """
+
+    if not missing_skills:
+        return []
+
+    skill_names = [item["skill"] for item in missing_skills if item.get("skill")]
+
+    if not skill_names:
+        return []
+
+    skills_str = ", ".join(skill_names[:8])  # cap at 8 to keep prompt focused
+
+    prompt = f"""
+You are a senior software engineer and career mentor.
+
+A candidate needs to build portfolio projects that demonstrate these missing skills:
+{skills_str}
+
+Generate exactly 5 project ideas that would help them close these gaps and impress hiring managers.
+Each project should:
+- Directly use 2-4 of the missing skills listed above
+- Be concrete and buildable (not just theoretical)
+- Range from beginner-friendly to advanced
+- Result in something they could put on GitHub
+
+Return ONLY a JSON object with this exact schema (no markdown, no preamble):
+
+{{
+  "projects": [
+    {{
+      "title": "Project title",
+      "description": "2-3 sentence description of what the project does and why it's impressive",
+      "skills_practiced": ["skill1", "skill2"],
+      "difficulty": "Beginner|Intermediate|Advanced",
+      "estimated_time": "X-Y weeks",
+      "tech_stack": ["Tech1", "Tech2", "Tech3"]
+    }}
+  ]
+}}
+"""
+
+    try:
+        response = await client.aio.models.generate_content(
+            model="gemini-2.5-flash",
+            contents=prompt,
+            config={
+                "temperature": 0.7,
+                "response_mime_type": "application/json",
+            },
+        )
+
+        raw_text = (response.text or "").strip()
+
+        if raw_text.startswith("```"):
+            raw_text = raw_text.strip("`")
+            if raw_text.startswith("json"):
+                raw_text = raw_text[4:]
+            raw_text = raw_text.strip()
+
+        parsed = json.loads(raw_text)
+        return parsed.get("projects", [])
+
+    except Exception as exc:
+        print(f"[skill_gap] Project recommendation generation failed: {exc}")
+        return []
+
+
+# ============================================================================
+# 14. SINGLE JOB API
 # ============================================================================
 
 async def get_skill_gap_for_job(
@@ -1685,7 +1770,14 @@ async def get_aggregate_skill_gap(
         ]
     )
 
+    # ----------------------------------------------------------------------
+    # Project recommendations (generated from the top gap skills).
+    # ----------------------------------------------------------------------
+
+    project_recommendations = await generate_project_recommendations(ranked_with_prep)
+
     return {
         "missing_skills": ranked_with_prep,
         "jobs_analyzed": len(jobs),
+        "project_recommendations": project_recommendations,
     }

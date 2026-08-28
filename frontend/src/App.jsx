@@ -4,6 +4,7 @@ import { supabase } from "./lib/supabase";
 
 import Dashboard from "./pages/Dashboard";
 import ResumeUpload from "./pages/ResumeUpload";
+import AtsScanner from "./pages/AtsScanner";
 import CareerProfile from "./pages/CareerProfile";
 import JobRecommendations from "./pages/JobRecommendations";
 import SkillGap from "./pages/SkillGap";
@@ -68,6 +69,7 @@ function App() {
             <Routes>
               <Route path="/" element={<Dashboard />} />
               <Route path="/resume" element={<ResumeUpload />} />
+              <Route path="/ats-scanner" element={<AtsScanner />} />
               <Route path="/profile" element={<CareerProfile />} />
               <Route path="/jobs" element={<JobRecommendations />} />
               <Route path="/skills" element={<SkillGap />} />

@@ -8,7 +8,8 @@ import {
   BookOpen, 
   Users,
   Sparkles,
-  ClipboardList
+  ClipboardList,
+  ShieldCheck
 } from "lucide-react";
 
 function Sidebar() {
@@ -17,6 +18,7 @@ function Sidebar() {
   const menuItems = [
     { path: "/", label: "Dashboard", icon: LayoutDashboard },
     { path: "/resume", label: "Resume Upload", icon: FileText },
+    { path: "/ats-scanner", label: "ATS Scanner & Score", icon: ShieldCheck },
     { path: "/profile", label: "Personal Dashboard", icon: User },
     { path: "/jobs", label: "Job Recommendations", icon: Briefcase },
     { path: "/skills", label: "Skill Gap Analysis", icon: Compass },

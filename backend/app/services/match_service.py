@@ -52,6 +52,66 @@ def extract_all_candidate_skills(profile: dict) -> list[str]:
     return unique
 
 
+def extract_job_skills(job: dict) -> list[str]:
+    """
+    Extract the best available skill signal from a job.
+    Priority:
+    1. required_skills (set by extract_job_requirements Gemini call)
+    2. tags (always available from Arbeitnow ingestion)
+    3. Title keywords as a last-resort signal
+    """
+    required = job.get("required_skills") or []
+    if required:
+        return [str(s).strip() for s in required if s]
+
+    tags = job.get("tags") or []
+    if tags:
+        return [str(t).strip() for t in tags if t]
+
+    # Final fallback: tokenize the title into words (≥4 chars, not stop words)
+    _stop = {"and", "the", "for", "with", "are", "you", "our", "this", "that", "have", "will"}
+    title_words = [
+        w for w in (job.get("title") or "").split()
+        if len(w) >= 4 and w.lower() not in _stop
+    ]
+    return title_words
+
+
+def build_candidate_summary(profile: dict) -> str:
+    """
+    Build a rich text summary of the candidate for semantic matching.
+    Uses the stored summary if present, otherwise synthesizes one
+    from skills, project tech stacks, and experience roles.
+    This avoids the flat-score problem caused by an empty summary.
+    """
+    summary = (profile.get("summary") or "").strip()
+    if summary:
+        return summary
+
+    parts = []
+
+    # Skills
+    skills = [s["skill_name"] for s in profile.get("skills", []) if s.get("skill_name")]
+    if skills:
+        parts.append("Skills: " + ", ".join(skills[:30]))
+
+    # Experience roles
+    for exp in profile.get("experience", [])[:3]:
+        role = exp.get("role", "")
+        company = exp.get("company", "")
+        desc = (exp.get("description") or "")[:200]
+        if role:
+            parts.append(f"{role} at {company}. {desc}")
+
+    # Project tech stacks
+    for proj in profile.get("projects", [])[:3]:
+        tech_stack = proj.get("tech_stack", [])
+        if isinstance(tech_stack, list) and tech_stack:
+            parts.append(f"Project: {proj.get('title', '')} using {', '.join(tech_stack[:8])}")
+
+    return " ".join(parts)[:1500]
+
+
 def extract_experience_years(profile: dict) -> Optional[float]:
     """
     Pulls total years of experience from profile_json if your extraction
@@ -218,12 +278,18 @@ async def _score_job(profile: dict, job: dict, embedding_cache: dict | None = No
     if embedding_cache is None:
         embedding_cache = {}
 
+    # Use smarter job skill extraction (falls back to tags/title if required_skills is empty)
+    job_skills = extract_job_skills(job)
+
     skill_score = await compute_semantic_skill_overlap(
-        resume_skills, job.get("required_skills", []), embedding_cache
+        resume_skills, job_skills, embedding_cache
     )
-    semantic_score = await compute_semantic_similarity(
-        profile.get("summary", "") or "", job.get("description", "") or ""
-    )
+
+    # Build a rich candidate text — avoids flat scores when profile.summary is empty
+    candidate_text = build_candidate_summary(profile)
+    job_text = (job.get("description") or job.get("title") or "").strip()
+
+    semantic_score = await compute_semantic_similarity(candidate_text, job_text)
     experience_score = compute_experience_match(resume_years, job.get("experience_years"))
 
     final_score = round(

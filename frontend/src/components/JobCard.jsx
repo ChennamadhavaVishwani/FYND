@@ -135,9 +135,9 @@ export default function JobCard({ job }) {
       )}
 
       {view === "match" && match && (
-        <div className="details-box" style={{ borderLeftColor: "#8b5cf6" }}>
+        <div className="details-box" style={{ borderLeftColor: "#3b82f6" }}>
           <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "8px" }}>
-            <span style={{ fontSize: "1.5rem", fontWeight: "bold", background: "var(--grad-primary)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
+            <span style={{ fontSize: "1.4rem", fontWeight: 800, color: "#3b82f6", fontFamily: "'Space Grotesk', sans-serif" }}>
               {match.match_score}% Match Score
             </span>
           </div>
@@ -160,9 +160,9 @@ export default function JobCard({ job }) {
       )}
 
       {view === "gap" && gap && (
-        <div className="details-box" style={{ borderLeftColor: "#06b6d4" }}>
+        <div className="details-box" style={{ borderLeftColor: "#0ea5e9" }}>
           <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "8px" }}>
-            <span style={{ fontSize: "1.5rem", fontWeight: "bold", background: "var(--grad-secondary)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
+            <span style={{ fontSize: "1.4rem", fontWeight: 800, color: "#0ea5e9", fontFamily: "'Space Grotesk', sans-serif" }}>
               {gap.coverage_percent}% Skill Coverage
             </span>
           </div>

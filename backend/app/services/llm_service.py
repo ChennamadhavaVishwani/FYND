@@ -11,9 +11,12 @@ from google.genai import types
 load_dotenv()
 
 
+_gemini_key = os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY")
+
 client = genai.Client(
-    api_key=os.getenv("GEMINI_API_KEY")
+    api_key=_gemini_key
 )
+
 
 
 EXTRACTION_PROMPT_DIRECT = """You are an expert AI resume parser with deep understanding of technical candidates, skills, and resume structures.
